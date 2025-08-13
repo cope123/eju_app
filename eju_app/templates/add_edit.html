@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8" />
+    <title>{% if action == 'edit' %}编辑{% else %}添加{% endif %}题目 - EJU 题库</title>
+    <style>
+        body { font-family: sans-serif; margin: 2rem; background-color: #f9fafb; color: #333; }
+        h1 { color: #007bff; }
+        form { margin-top: 1rem; max-width: 600px; }
+        label { display: block; margin-top: 0.5rem; }
+        input[type="text"], textarea { width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; }
+        .radio-group { margin-top: 0.5rem; }
+        .radio-group label { display: inline-block; margin-right: 1rem; }
+        button { margin-top: 1rem; padding: 0.5rem 1rem; background-color: #007bff; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background-color: #0069d9; }
+        a { text-decoration: none; color: #007bff; }
+        .flash { padding: 0.5rem; margin-bottom: 1rem; border-radius: 4px; }
+        .flash.error { background-color: #f8d7da; color: #842029; }
+        .flash.success { background-color: #d1e7dd; color: #0f5132; }
+    </style>
+</head>
+<body>
+    <h1>{% if action == 'edit' %}编辑题目{% else %}添加新题目{% endif %}</h1>
+    <p><a href="{{ request.url_for('admin') }}">返回后台</a></p>
+    {# Messages are passed via query parameters on the admin page; nothing shown here. #}
+    <form method="post">
+        <label>题目内容</label>
+        <textarea name="question" rows="3" required>{{ question_data.question if question_data else '' }}</textarea>
+        <label>A 选项</label>
+        <input type="text" name="option_a" value="{{ question_data.option_a if question_data else '' }}" required />
+        <label>B 选项</label>
+        <input type="text" name="option_b" value="{{ question_data.option_b if question_data else '' }}" required />
+        <label>C 选项</label>
+        <input type="text" name="option_c" value="{{ question_data.option_c if question_data else '' }}" required />
+        <label>D 选项</label>
+        <input type="text" name="option_d" value="{{ question_data.option_d if question_data else '' }}" required />
+        <label>正确答案</label>
+        <div class="radio-group">
+            {% set selected = question_data.correct_option if question_data else '' %}
+            <label><input type="radio" name="correct_option" value="A" {% if selected == 'A' %}checked{% endif %} required/> A</label>
+            <label><input type="radio" name="correct_option" value="B" {% if selected == 'B' %}checked{% endif %} required/> B</label>
+            <label><input type="radio" name="correct_option" value="C" {% if selected == 'C' %}checked{% endif %} required/> C</label>
+            <label><input type="radio" name="correct_option" value="D" {% if selected == 'D' %}checked{% endif %} required/> D</label>
+        </div>
+        <label>标签（用逗号分隔）</label>
+        <input type="text" name="tags" value="{{ question_data.tags if question_data else '' }}" />
+        <button type="submit">{% if action == 'edit' %}保存更改{% else %}添加题目{% endif %}</button>
+    </form>
+</body>
+</html>

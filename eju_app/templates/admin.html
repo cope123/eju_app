@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8" />
+    <title>后台管理 - EJU 题库</title>
+    <style>
+        body { font-family: sans-serif; margin: 2rem; background-color: #f9fafb; color: #333; }
+        h1 { color: #007bff; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { padding: 0.5rem; border: 1px solid #ddd; text-align: left; }
+        th { background-color: #f1f1f1; }
+        a.button { display: inline-block; padding: 0.5rem 1rem; background-color: #28a745; color: #fff; text-decoration: none; border-radius: 4px; }
+        a.button:hover { background-color: #218838; }
+        .actions a { margin-right: 0.5rem; text-decoration: none; color: #007bff; }
+        .flash { padding: 0.5rem; margin-bottom: 1rem; border-radius: 4px; }
+        .flash.error { background-color: #f8d7da; color: #842029; }
+        .flash.success { background-color: #d1e7dd; color: #0f5132; }
+    </style>
+</head>
+<body>
+    <h1>后台管理</h1>
+    <p><a class="button" href="{{ request.url_for('add_question_get') }}">添加新题目</a> | <a class="button" href="{{ request.url_for('quiz') }}">前往学生答题</a></p>
+    {% if msg %}
+        <div class="flash {{ category or '' }}">{{ msg }}</div>
+    {% endif %}
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>题目</th>
+                <th>标签</th>
+                <th>正确答案</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for q in questions %}
+            <tr>
+                <td>{{ q['id'] }}</td>
+                <td>{{ q['question']|truncate(60) }}</td>
+                <td>{{ q['tags'] }}</td>
+                <td>{{ q['correct_option'] }}</td>
+                <td class="actions">
+                    <a href="{{ request.url_for('edit_question_get', qid=q['id']) }}">编辑</a>
+                    <form style="display:inline" method="post" action="{{ request.url_for('delete_question', qid=q['id']) }}" onsubmit="return confirm('确定要删除此题吗？');">
+                        <button type="submit" style="background:none;border:none;color:#dc3545;cursor:pointer">删除</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5">没有题目。</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8" />
+    <title>答题结果 - EJU 题库</title>
+    <style>
+        body { font-family: sans-serif; margin: 2rem; background-color: #f9fafb; color: #333; }
+        h1 { color: #007bff; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { padding: 0.5rem; border: 1px solid #ddd; text-align: left; }
+        th { background-color: #f1f1f1; }
+        .correct { color: #198754; }
+        .wrong { color: #dc3545; }
+        a.button { display: inline-block; padding: 0.5rem 1rem; background-color: #0d6efd; color: #fff; text-decoration: none; border-radius: 4px; margin-top: 1rem; }
+        a.button:hover { background-color: #0b5ed7; }
+    </style>
+</head>
+<body>
+    <h1>答题结果</h1>
+    <p>总题数：{{ total }}，答对：{{ correct }}，得分：{{ score }}%</p>
+    <table>
+        <thead>
+            <tr>
+                <th>题目 ID</th>
+                <th>你的答案</th>
+                <th>正确答案</th>
+                <th>结果</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in details %}
+                <tr>
+                    <td>{{ item.id }}</td>
+                    <td>{{ item.user_answer }}</td>
+                    <td>{{ item.correct_answer }}</td>
+                    <td class="{% if item.is_correct %}correct{% else %}wrong{% endif %}">
+                        {% if item.is_correct %}正确{% else %}错误{% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a class="button" href="{{ request.url_for('quiz') }}">返回继续答题</a>
+    <a class="button" href="{{ request.url_for('admin') }}">进入后台</a>
+</body>
+</html>
