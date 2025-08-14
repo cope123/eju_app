@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>选择板块 - EJU 题库</title>
+<style>
+body { font-family: sans-serif; margin: 2rem; background-color: #f9fafb; color: #333; }
+h1 { color: #007bff; }
+p { margin-top: 0.5rem; }
+.sections { display: flex; gap: 1rem; flex-wrap: wrap; }
+.section-card {
+  flex: 1 1 200px;
+  padding: 1.5rem;
+  background-color: #fff;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  text-align: center;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: transform .2s ease;
+}
+.section-card:hover {
+  transform: translateY(-4px);
+  background-color: #f0f8ff;
+}
+</style>
+</head>
+<body>
+<h1>欢迎来到 EJU 题库</h1>
+<p>请选择你想练习的板块：</p>
+<div class="sections">
+    <a class="section-card" href="{{ url_for('quiz') }}?section=日语">日语</a>
+    <a class="section-card" href="{{ url_for('quiz') }}?section=综合科目">综合科目</a>
+    <a class="section-card" href="{{ url_for('quiz') }}?section=理科">理科</a>
+</div>
+</body>
+</html>
