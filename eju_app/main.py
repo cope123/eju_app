@@ -160,7 +160,7 @@ async def submit_quiz(request: Request):
     correct = 0
     details = []
     for row in result_set:
-        qid = str(row[0])
+        qid = str(row["id"])
         correct_answer = row["correct_option"]
         user_answer = answers.get(qid)
         is_correct = user_answer == correct_answer
