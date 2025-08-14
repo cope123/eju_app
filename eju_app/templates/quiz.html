@@ -1,54 +1,83 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-    <meta charset="UTF-8" />
-    <title>学生答题 - EJU 题库</title>
-    <style>
-        body { font-family: sans-serif; margin: 2rem; background-color: #f9fafb; color: #333; }
-        h1 { color: #007bff; }
-        form { margin-top: 1rem; }
-        .question { margin-bottom: 1.5rem; padding: 1rem; background-color: #fff; border: 1px solid #ddd; border-radius: 4px; }
-        .question h3 { margin: 0 0 0.5rem 0; }
-        .options label { display: block; margin-bottom: 0.3rem; }
-        button { margin-top: 1rem; padding: 0.5rem 1rem; background-color: #28a745; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
-        button:hover { background-color: #218838; }
-        .filter { margin-bottom: 1rem; }
-        select { padding: 0.3rem; border-radius: 4px; border: 1px solid #ccc; }
-        a { text-decoration: none; color: #007bff; }
-    </style>
+<meta charset="UTF-8">
+<title>{{ selected_section if selected_section else '题目' }} - 学生答题 - EJU 题库</title>
+<style>
+body { font-family: sans-serif; margin: 2rem; background-color: #f9fafb; color: #333; }
+header { display: flex; justify-content: space-between; align-items: center; }
+header h1 { color: #007bff; margin: 0; }
+header nav a { margin-left: 1rem; text-decoration: none; color: #007bff; }
+.question-card {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+.question-card h3 { margin-top: 0; }
+.options label { display: block; margin-bottom: 0.3rem; }
+button {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background-color: #28a745;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+button:hover { background-color: #218838; }
+.filter { margin-bottom: 1rem; }
+select { padding: 0.3rem; border-radius: 4px; border: 1px solid #ccc; }
+</style>
 </head>
 <body>
-    <h1>学生答题</h1>
-    <p><a href="{{ request.url_for('admin') }}">进入后台管理</a></p>
-    <div class="filter">
-        <form method="get" action="{{ url_for('quiz') }}">
-            <label>按标签筛选：</label>
-            <select name="tag">
-                <option value="">-- 全部 --</option>
-                {% for tag in tags %}
-                    <option value="{{ tag }}" {% if selected_tag == tag %}selected{% endif %}>{{ tag }}</option>
-                {% endfor %}
-            </select>
-            <button type="submit">应用</button>
-        </form>
-    </div>
+<header>
+    <div><h1>{{ selected_section or '全部题目' }}</h1></div>
+    <nav>
+        <a href="{{ url_for('home') }}">首页</a>
+    </nav>
+</header>
+
+<div class="filter">
+    <form method="get" action="{{ url_for('quiz') }}">
+        <input type="hidden" name="section" value="{{ selected_section }}">
+        <label for="tag-select">按标签筛选：</label>
+        <select name="tag" id="tag-select">
+            <option value="">-- 全部 --</option>
+            {% for parent, children in tags_hierarchy.items() %}
+                {% if children %}
+                    <optgroup label="{{ parent }}">
+                        {% for child in children %}
+                            <option value="{{ parent ~ '/' ~ child }}" {% if selected_tag == parent ~ '/' ~ child %}selected{% endif %}>{{ child }}</option>
+                        {% endfor %}
+                    </optgroup>
+                {% else %}
+                    <option value="{{ parent }}" {% if selected_tag == parent %}selected{% endif %}>{{ parent }}</option>
+                {% endif %}
+            {% endfor %}
+        </select>
+        <button type="submit">应用</button>
+    </form>
+</div>
+
+<form method="post">
     {% if questions|length == 0 %}
         <p>没有题目可供选择。</p>
     {% else %}
-        <form method="post">
-            {% for q in questions %}
-                <div class="question">
-                    <h3>{{ loop.index }}. {{ q['question'] }}</h3>
-                    <div class="options">
-                        <label><input type="radio" name="question-{{ q['id'] }}" value="A" required/> A. {{ q['option_a'] }}</label>
-                        <label><input type="radio" name="question-{{ q['id'] }}" value="B" required/> B. {{ q['option_b'] }}</label>
-                        <label><input type="radio" name="question-{{ q['id'] }}" value="C" required/> C. {{ q['option_c'] }}</label>
-                        <label><input type="radio" name="question-{{ q['id'] }}" value="D" required/> D. {{ q['option_d'] }}</label>
-                    </div>
-                </div>
-            {% endfor %}
-            <button type="submit">提交答案</button>
-        </form>
+        {% for q in questions %}
+        <div class="question-card">
+            <h3>{{ loop.index }}. {{ q['question'] }}</h3>
+            <div class="options">
+                <label><input type="radio" name="question-{{ q['id'] }}" value="A"> A. {{ q['option_a'] }}</label>
+                <label><input type="radio" name="question-{{ q['id'] }}" value="B"> B. {{ q['option_b'] }}</label>
+                <label><input type="radio" name="question-{{ q['id'] }}" value="C"> C. {{ q['option_c'] }}</label>
+                <label><input type="radio" name="question-{{ q['id'] }}" value="D"> D. {{ q['option_d'] }}</label>
+            </div>
+        </div>
+        {% endfor %}
+        <button type="submit">提交答案</button>
     {% endif %}
+</form>
 </body>
 </html>
