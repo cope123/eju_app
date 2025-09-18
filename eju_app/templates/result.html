@@ -1,49 +1,165 @@
-<!DOCTYPE html>
-<html lang="zh">
-<head>
-<meta charset="UTF-8">
-<title>答题结果 - EJU 题库</title>
-<style>
-body { font-family: sans-serif; margin: 2rem; background-color: #f9fafb; color: #333; }
-h1 { color: #007bff; }
-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-th, td { padding: 0.5rem; border: 1px solid #ddd; text-align: left; }
-th { background-color: #f1f1f1; }
-.correct { color: #198754; }
-.wrong { color: #dc3545; }
-a.button { display: inline-block; padding: 0.5rem 1rem; background-color: #0d6efd; color: #fff; text-decoration: none; border-radius: 4px; margin-top: 1rem; }
-a.button:hover { background-color: #0b5ed7; }
-</style>
-</head>
-<body>
-<h1>答题结果</h1>
-<p>总题数：{{ total }}，答对：{{ correct }}，得分：{{ score }}%</p>
-<table>
-    <thead>
-        <tr>
-            <th>题目 ID</th>
-            <th>你的答案</th>
-            <th>正确答案</th>
-            <th>结果</th>
-        </tr>
-    </thead>
-    <tbody>
+{% extends "base.html" %}
+{% block title %}答题结果 - EJU 题库{% endblock %}
+{% block extra_styles %}
+.score-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.score-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.score-item span:first-child {
+    font-size: 0.9rem;
+    color: var(--muted);
+}
+
+.score-item strong {
+    font-size: 1.8rem;
+    color: var(--primary);
+}
+
+.question-review {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.review-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.review-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.answer-status {
+    font-weight: 700;
+}
+
+.answer-status.correct {
+    color: var(--success);
+}
+
+.answer-status.wrong {
+    color: var(--danger);
+}
+
+.answer-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.5rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.options-list {
+    margin-top: 0.75rem;
+    display: grid;
+    gap: 0.4rem;
+}
+
+.options-list span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.45rem 0.6rem;
+    border-radius: 8px;
+    background: #f8f9fb;
+}
+
+.options-list span.correct {
+    background: rgba(25, 135, 84, 0.15);
+    color: var(--success);
+}
+
+.options-list span.selected {
+    border: 1px solid var(--primary);
+}
+
+.review-actions {
+    margin-top: 2rem;
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.review-actions .btn {
+    min-width: 160px;
+    justify-content: center;
+}
+{% endblock %}
+{% block content %}
+<h1 class="section-title">答题结果</h1>
+<div class="score-card">
+    <div class="score-item">
+        <span>答题数量</span>
+        <strong>{{ total }}</strong>
+    </div>
+    <div class="score-item">
+        <span>答对题数</span>
+        <strong>{{ correct }}</strong>
+    </div>
+    <div class="score-item">
+        <span>正确率</span>
+        <strong>{{ score }}%</strong>
+    </div>
+</div>
+<div class="question-review">
+    {% if details %}
         {% for item in details %}
-        <tr>
-            <td>{{ item.id }}</td>
-            <td>{{ item.user_answer }}</td>
-            <td>{{ item.correct_answer }}</td>
-            <td class="{{ 'correct' if item.is_correct else 'wrong' }}">
-                {% if item.is_correct %}正确{% else %}错误{% endif %}
-            </td>
-        </tr>
+        <div class="review-card">
+            <div class="review-header">
+                <h3>{{ loop.index }}. {{ item.question }}</h3>
+                <span class="answer-status {{ 'correct' if item.is_correct else 'wrong' }}">
+                    {% if item.is_correct %}回答正确{% else %}回答错误{% endif %}
+                </span>
+            </div>
+            <div class="answer-meta">
+                <span>题目 ID：{{ item.id }}</span>
+                <span>板块：{{ item.section or '未分类' }}</span>
+                {% if item.tag_list %}
+                    <span>标签：{{ item.tag_list | join(', ') }}</span>
+                {% endif %}
+                <span>你的答案：{{ item.user_answer or '未作答' }}</span>
+                <span>正确答案：{{ item.correct_answer }}</span>
+            </div>
+            <div class="options-list">
+                {% for key, text in item.options %}
+                <span class="{% if key == item.correct_answer %}correct{% endif %} {% if key == item.user_answer %}selected{% endif %}"><strong>{{ key }}.</strong> {{ text }}</span>
+                {% endfor %}
+            </div>
+        </div>
         {% endfor %}
-        {% if details|length == 0 %}
-        <tr><td colspan="4">没有答题记录。</td></tr>
-        {% endif %}
-    </tbody>
-</table>
-<a class="button" href="{{ url_for('quiz') }}">继续答题</a>
-<a class="button" href="{{ url_for('home') }}">返回首页</a>
-</body>
-</html>
+    {% else %}
+        <div class="flash info">暂无答题记录。</div>
+    {% endif %}
+</div>
+<div class="review-actions">
+    <a class="btn btn-primary" href="{{ request.url_for('quiz') }}">继续练习</a>
+    <a class="btn btn-secondary" href="{{ request.url_for('home') }}">返回首页</a>
+</div>
+{% endblock %}

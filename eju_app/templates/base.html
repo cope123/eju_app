@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}EJU 题库{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        :root {
+            color-scheme: light;
+            --primary: #0d6efd;
+            --primary-dark: #0b5ed7;
+            --success: #198754;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --border-color: #dee2e6;
+            --background: #f6f7fb;
+            --card-bg: #ffffff;
+            --text-color: #343a40;
+            --muted: #6c757d;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: var(--background);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: #ffffff;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .container {
+            width: min(1100px, 96vw);
+            margin: 0 auto;
+            padding: 1.5rem 0;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+
+        .brand {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        nav a {
+            margin-left: 1rem;
+            text-decoration: none;
+            color: var(--muted);
+            font-weight: 500;
+        }
+
+        nav a.active,
+        nav a:hover {
+            color: var(--primary);
+        }
+
+        main {
+            flex: 1;
+            padding-bottom: 3rem;
+        }
+
+        footer {
+            background: #ffffff;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            padding: 1rem 0;
+            font-size: 0.9rem;
+            color: var(--muted);
+        }
+
+        .flash {
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+        }
+
+        .flash.success {
+            background: #d1e7dd;
+            color: #0f5132;
+            border: 1px solid #badbcc;
+        }
+
+        .flash.error {
+            background: #f8d7da;
+            color: #842029;
+            border: 1px solid #f5c2c7;
+        }
+
+        .flash.info {
+            background: #cff4fc;
+            color: #055160;
+            border: 1px solid #b6effb;
+        }
+
+        .section-title {
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+
+        .subtitle {
+            color: var(--muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: #e9ecef;
+            color: var(--text-color);
+        }
+
+        .btn-secondary:hover {
+            background: #dde1e6;
+        }
+
+        form {
+            margin: 0;
+        }
+
+        input[type="text"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 0.5rem 0.65rem;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            font-size: 1rem;
+            transition: border-color .2s ease;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus,
+        select:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(13,110,253,0.15);
+        }
+
+        @media (max-width: 640px) {
+            .topbar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            nav a {
+                margin: 0 0.75rem 0.25rem 0;
+            }
+        }
+
+        {% block extra_styles %}{% endblock %}
+    </style>
+</head>
+<body>
+<header>
+    <div class="container topbar">
+        <a class="brand" href="{{ request.url_for('home') }}">EJU 题库</a>
+        <nav>
+            <a href="{{ request.url_for('home') }}" class="{% if request.url.path == '/' %}active{% endif %}">首页</a>
+            <a href="{{ request.url_for('quiz') }}" class="{% if request.url.path.startswith('/quiz') %}active{% endif %}">学生答题</a>
+            <a href="{{ request.url_for('admin') }}" class="{% if request.url.path.startswith('/admin') and 'edit' not in request.url.path and 'add' not in request.url.path %}active{% endif %}">后台管理</a>
+        </nav>
+    </div>
+</header>
+<main>
+    <div class="container">
+        {% if feedback %}
+            {% for item in feedback %}
+                <div class="flash {{ item.category }}">{{ item.text }}</div>
+            {% endfor %}
+        {% endif %}
+        {% block content %}{% endblock %}
+    </div>
+</main>
+<footer>
+    <div class="container">EJU 题库 · 更高效地练习与分类检索题目</div>
+</footer>
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>

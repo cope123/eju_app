@@ -1,39 +1,123 @@
-<!DOCTYPE html>
-<html lang="zh">
-<head>
-<meta charset="UTF-8">
-<title>选择板块 - EJU 题库</title>
-<style>
-body { font-family: sans-serif; margin: 2rem; background-color: #f9fafb; color: #333; }
-h1 { color: #007bff; }
-p { margin-top: 0.5rem; }
-.sections { display: flex; gap: 1rem; flex-wrap: wrap; }
+{% extends "base.html" %}
+{% block title %}首页 - EJU 题库{% endblock %}
+{% block extra_styles %}
+.section-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.25rem;
+}
+
 .section-card {
-  flex: 1 1 200px;
-  padding: 1.5rem;
-  background-color: #fff;
-  border-radius: 6px;
-  border: 1px solid #ddd;
-  text-align: center;
-  cursor: pointer;
-  text-decoration: none;
-  color: inherit;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  transition: transform .2s ease;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+    transition: transform .2s ease, box-shadow .2s ease;
+    text-decoration: none;
+    color: inherit;
 }
+
 .section-card:hover {
-  transform: translateY(-4px);
-  background-color: #f0f8ff;
+    transform: translateY(-4px);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
 }
-</style>
-</head>
-<body>
-<h1>欢迎来到 EJU 题库</h1>
-<p>请选择你想练习的板块：</p>
-<div class="sections">
-    <a class="section-card" href="{{ url_for('quiz') }}?section=日语">日语</a>
-    <a class="section-card" href="{{ url_for('quiz') }}?section=综合科目">综合科目</a>
-    <a class="section-card" href="{{ url_for('quiz') }}?section=理科">理科</a>
+
+.section-count {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.section-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.tag-chip {
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    background: #e7f1ff;
+    color: var(--primary);
+    font-size: 0.85rem;
+}
+
+.quick-actions {
+    margin-top: 2rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.quick-actions .btn {
+    min-width: 160px;
+    justify-content: center;
+}
+
+.tag-cloud {
+    margin-top: 2.5rem;
+}
+
+.tag-cloud-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.tag-cloud-list a {
+    text-decoration: none;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.tag-cloud-list a:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+{% endblock %}
+{% block content %}
+<h1 class="section-title">欢迎来到 EJU 题库</h1>
+<p class="subtitle">当前共收录 <strong>{{ total_questions }}</strong> 道题目，可按板块与标签快速检索。</p>
+<div class="section-grid">
+    {% for section in sections %}
+    <a class="section-card" href="{{ request.url_for('quiz') }}?section={{ section.name | urlencode }}">
+        <div class="section-title" style="margin:0; font-size:1.4rem;">{{ section.display_name }}</div>
+        <div class="section-count">{{ section.count }}</div>
+        <div class="section-tags">
+            {% if section.top_tags %}
+                {% for tag in section.top_tags %}
+                <span class="tag-chip">{{ tag }}</span>
+                {% endfor %}
+            {% else %}
+                <span class="tag-chip" style="background:#f1f3f5;color:var(--muted);">暂无标签</span>
+            {% endif %}
+        </div>
+    </a>
+    {% endfor %}
 </div>
-</body>
-</html>
+<div class="quick-actions">
+    <a class="btn btn-primary" href="{{ request.url_for('quiz') }}">开始练习</a>
+    <a class="btn btn-secondary" href="{{ request.url_for('admin') }}">管理题库</a>
+    <a class="btn btn-secondary" href="{{ request.url_for('add_question_get') }}">添加新题目</a>
+</div>
+<div class="tag-cloud">
+    <h2 style="font-size:1.3rem; margin-bottom:0.75rem;">热门分类标签</h2>
+    <div class="tag-cloud-list">
+        {% if top_tags %}
+            {% for tag in top_tags %}
+            <a href="{{ request.url_for('quiz') }}?tag={{ tag | urlencode }}">{{ tag }}</a>
+            {% endfor %}
+        {% else %}
+            <span style="color:var(--muted);">暂无标签数据。</span>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
