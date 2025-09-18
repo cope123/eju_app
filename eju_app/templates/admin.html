@@ -1,71 +1,191 @@
-<!DOCTYPE html>
-<html lang="zh">
-<head>
-<meta charset="UTF-8">
-<title>后台管理 - EJU 题库</title>
-<style>
-body { font-family: sans-serif; margin: 2rem; background-color: #f9fafb; color: #333; }
-h1 { color: #007bff; }
-nav a { margin-right: 1rem; text-decoration: none; color: #007bff; }
-nav a.button {
-  display: inline-block;
-  padding: 0.5rem 1rem;
-  background-color: #28a745;
-  color: #fff;
-  border-radius: 4px;
+{% extends "base.html" %}
+{% block title %}后台管理 - EJU 题库{% endblock %}
+{% block extra_styles %}
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
 }
-nav a.button:hover { background-color: #218838; }
-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-th, td { padding: 0.5rem; border: 1px solid #ddd; text-align: left; }
-th { background-color: #f1f1f1; }
-.actions a { margin-right: 0.5rem; text-decoration: none; color: #007bff; }
-.flash { padding: 0.5rem; margin-bottom: 1rem; border-radius: 4px; }
-.flash.error { background-color: #f8d7da; color: #842029; }
-.flash.success { background-color: #d1e7dd; color: #0f5132; }
-</style>
-</head>
-<body>
-<h1>后台管理</h1>
-<nav>
-    <a href="{{ url_for('home') }}">返回首页</a>
-    <a class="button" href="{{ url_for('add_question_get') }}">添加新题目</a>
-    <a class="button" href="{{ url_for('quiz') }}">前往学生答题</a>
-</nav>
 
-{% if msg %}
-<div class="flash {{ category }}">{{ msg }}</div>
-{% endif %}
+.admin-header h1 {
+    margin: 0;
+}
 
+.filter-panel {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    align-items: end;
+    margin-bottom: 1.25rem;
+}
+
+.filter-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.filter-actions .btn {
+    flex: 1 1 120px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--card-bg);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+}
+
+th, td {
+    padding: 0.75rem 0.9rem;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: top;
+    text-align: left;
+}
+
+th {
+    background: #f8f9fb;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 0.78rem;
+}
+
+tbody tr:hover {
+    background: #f8fafd;
+}
+
+.tag-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.tag-badges span {
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    background: #e7f1ff;
+    color: var(--primary);
+    font-size: 0.78rem;
+}
+
+.actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.actions a,
+.actions button {
+    text-decoration: none;
+    padding: 0.35rem 0.65rem;
+    border-radius: 6px;
+    border: none;
+    background: #e9ecef;
+    color: var(--text-color);
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.actions a:hover,
+.actions button:hover {
+    background: #dde1e6;
+}
+
+.empty-row {
+    text-align: center;
+    color: var(--muted);
+}
+{% endblock %}
+{% block content %}
+<div class="admin-header">
+    <div>
+        <h1>后台管理</h1>
+        <p class="subtitle">共 {{ questions|length }} 道题目。可按板块、标签与关键词检索。</p>
+    </div>
+    <a class="btn btn-primary" href="{{ request.url_for('add_question_get') }}">添加新题目</a>
+</div>
+<form method="get" class="filter-panel">
+    <div>
+        <label for="section">板块</label>
+        <select name="section" id="section">
+            <option value="">全部板块</option>
+            {% for section in sections %}
+            <option value="{{ section.name }}" {% if section.name == selected_section %}selected{% endif %}>{{ section.display_name }} ({{ section.count }})</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div>
+        <label for="tag-select">标签</label>
+        <select name="tag" id="tag-select">
+            <option value="">全部标签</option>
+            {% for option in tag_options %}
+            <option value="{{ option.value }}" {% if option.value == selected_tag %}selected{% endif %}>
+                {{ "\u00a0\u00a0" * option.level }}{{ option.label }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+    <div>
+        <label for="search">关键词</label>
+        <input type="text" name="search" id="search" value="{{ search }}" placeholder="题干或标签关键词">
+    </div>
+    <div class="filter-actions">
+        <button class="btn btn-primary" type="submit">应用筛选</button>
+        <a class="btn btn-secondary" href="{{ request.url_for('admin') }}">重置</a>
+    </div>
+</form>
 <table>
     <thead>
         <tr>
-            <th>ID</th>
-            <th>题目</th>
-            <th>标签</th>
-            <th>板块</th>
-            <th>正确答案</th>
-            <th>操作</th>
+            <th style="width:4rem;">ID</th>
+            <th style="width:30%;">题目</th>
+            <th style="width:18%;">板块</th>
+            <th style="width:24%;">标签</th>
+            <th style="width:10%;">正确答案</th>
+            <th style="width:14%;">操作</th>
         </tr>
     </thead>
     <tbody>
-        {% for q in questions %}
-        <tr>
-            <td>{{ q['id'] }}</td>
-            <td>{{ q['question']|truncate(60) }}</td>
-            <td>{{ q['tags'] }}</td>
-            <td>{{ q['section'] }}</td>
-            <td>{{ q['correct_option'] }}</td>
-            <td class="actions">
-                <a href="{{ url_for('edit_question_get', qid=q['id']) }}">编辑</a>
-                <a href="#" onclick="if(confirm('确认删除此题目？')){ document.getElementById('del-{{ q['id'] }}').submit(); } return false;">删除</a>
-                <form id="del-{{ q['id'] }}" method="post" action="{{ url_for('delete_question', qid=q['id']) }}" style="display:none;"></form>
-            </td>
-        </tr>
-        {% endfor %}
-        {% if questions|length == 0 %}
-        <tr><td colspan="6">没有题目。</td></tr>
+        {% if questions %}
+            {% for q in questions %}
+            <tr>
+                <td>{{ q.id }}</td>
+                <td>{{ q.question }}</td>
+                <td>{{ q.section or '未分类' }}</td>
+                <td>
+                    <div class="tag-badges">
+                        {% if q.tag_list %}
+                            {% for tag in q.tag_list %}
+                            <span>{{ tag }}</span>
+                            {% endfor %}
+                        {% else %}
+                            <span style="background:#f1f3f5;color:var(--muted);">无标签</span>
+                        {% endif %}
+                    </div>
+                </td>
+                <td>{{ q.correct_option }}</td>
+                <td>
+                    <div class="actions">
+                        <a href="{{ request.url_for('edit_question_get', qid=q.id) }}">编辑</a>
+                        <form method="post" action="{{ request.url_for('delete_question', qid=q.id) }}" onsubmit="return confirm('确认删除此题目？');">
+                            <button type="submit">删除</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        {% else %}
+        <tr><td colspan="6" class="empty-row">暂无题目，请添加新题目。</td></tr>
         {% endif %}
     </tbody>
 </table>
-</body>
-</html>
+{% endblock %}

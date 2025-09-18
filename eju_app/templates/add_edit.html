@@ -1,73 +1,113 @@
-<!DOCTYPE html>
-<html lang="zh">
-<head>
-<meta charset="UTF-8">
-<title>{% if action == 'edit' %}编辑题目{% else %}添加新题目{% endif %} - EJU 题库</title>
-<style>
-body { font-family: sans-serif; margin: 2rem; background-color: #f9fafb; color: #333; }
-h1 { color: #007bff; }
-form { margin-top: 1rem; max-width: 600px; }
-label { display: block; margin-top: 0.5rem; }
-input[type="text"], textarea, select { width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; }
-textarea { min-height: 80px; resize: vertical; }
-.radio-group { margin-top: 0.5rem; }
-.radio-group label { display: inline-block; margin-right: 1rem; }
-button {
-  margin-top: 1rem;
-  padding: 0.5rem 1rem;
-  background-color: #007bff;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
+{% extends "base.html" %}
+{% block title %}{% if action == 'edit' %}编辑题目{% else %}添加新题目{% endif %} - EJU 题库{% endblock %}
+{% block extra_styles %}
+.form-wrapper {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+    max-width: 720px;
 }
-button:hover { background-color: #0069d9; }
-a { text-decoration: none; color: #007bff; }
-.flash { padding: 0.5rem; margin-bottom: 1rem; border-radius: 4px; }
-.flash.error { background-color: #f8d7da; color: #842029; }
-.flash.success { background-color: #d1e7dd; color: #0f5132; }
-</style>
-</head>
-<body>
-<h1>{% if action == 'edit' %}编辑题目{% else %}添加新题目{% endif %}</h1>
-<a href="{{ url_for('admin') }}">返回后台</a>
-<form method="post">
-    <label>题目内容
-        <textarea name="question" required>{{ question_data.question if question_data else '' }}</textarea>
-    </label>
-    <label>A 选项
-        <input type="text" name="option_a" value="{{ question_data.option_a if question_data else '' }}" required>
-    </label>
-    <label>B 选项
-        <input type="text" name="option_b" value="{{ question_data.option_b if question_data else '' }}" required>
-    </label>
-    <label>C 选项
-        <input type="text" name="option_c" value="{{ question_data.option_c if question_data else '' }}" required>
-    </label>
-    <label>D 选项
-        <input type="text" name="option_d" value="{{ question_data.option_d if question_data else '' }}" required>
-    </label>
-    <label>正确答案
+
+form label {
+    display: block;
+    margin-top: 1rem;
+    font-weight: 600;
+    color: var(--muted);
+}
+
+form textarea {
+    min-height: 100px;
+}
+
+.radio-group {
+    display: flex;
+    gap: 1.25rem;
+    margin-top: 0.5rem;
+}
+
+.radio-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 0;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.helper-text {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-top: 0.35rem;
+}
+
+.form-actions {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 0.75rem;
+}
+
+.form-actions .btn {
+    flex: 1 1 160px;
+    justify-content: center;
+}
+{% endblock %}
+{% block content %}
+<h1 class="section-title">{% if action == 'edit' %}编辑题目{% else %}添加新题目{% endif %}</h1>
+<p class="subtitle">完善题干、选项、正确答案与标签，便于后续分类检索。</p>
+<div class="form-wrapper">
+    {% if form_errors %}
+    <div class="flash error">
+        <strong>请检查以下问题：</strong>
+        <ul>
+            {% for err in form_errors %}
+            <li>{{ err }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+    <form method="post">
+        <label for="question">题目内容</label>
+        <textarea id="question" name="question" required>{{ question_data.question if question_data else '' }}</textarea>
+
+        <label for="option_a">A 选项</label>
+        <input type="text" id="option_a" name="option_a" value="{{ question_data.option_a if question_data else '' }}" required>
+
+        <label for="option_b">B 选项</label>
+        <input type="text" id="option_b" name="option_b" value="{{ question_data.option_b if question_data else '' }}" required>
+
+        <label for="option_c">C 选项</label>
+        <input type="text" id="option_c" name="option_c" value="{{ question_data.option_c if question_data else '' }}" required>
+
+        <label for="option_d">D 选项</label>
+        <input type="text" id="option_d" name="option_d" value="{{ question_data.option_d if question_data else '' }}" required>
+
+        <label>正确答案</label>
         {% set selected = question_data.correct_option if question_data else '' %}
         <div class="radio-group">
-            <label><input type="radio" name="correct_option" value="A" {% if selected == 'A' %}checked{% endif %}> A</label>
-            <label><input type="radio" name="correct_option" value="B" {% if selected == 'B' %}checked{% endif %}> B</label>
-            <label><input type="radio" name="correct_option" value="C" {% if selected == 'C' %}checked{% endif %}> C</label>
-            <label><input type="radio" name="correct_option" value="D" {% if selected == 'D' %}checked{% endif %}> D</label>
+            {% for key, label in correct_option_choices %}
+            <label><input type="radio" name="correct_option" value="{{ key }}" {% if selected == key %}checked{% endif %}> {{ label }}</label>
+            {% endfor %}
         </div>
-    </label>
-    <label>板块
-        {% set selected_sec = question_data.section if question_data else '' %}
-        <select name="section" required>
-            {% for sec in ['日语', '综合科目', '理科'] %}
-            <option value="{{ sec }}" {% if selected_sec == sec %}selected{% endif %}>{{ sec }}</option>
+
+        <label for="section">所属板块</label>
+        {% set selected_section = question_data.section if question_data else '' %}
+        <select id="section" name="section" required>
+            <option value="" disabled {% if not selected_section %}selected{% endif %}>请选择板块</option>
+            {% for sec in section_choices %}
+            <option value="{{ sec }}" {% if selected_section == sec %}selected{% endif %}>{{ sec }}</option>
             {% endfor %}
         </select>
-    </label>
-    <label>标签（用逗号分隔；层级用“/”分隔）
-        <input type="text" name="tags" value="{{ question_data.tags if question_data else '' }}">
-    </label>
-    <button type="submit">{% if action == 'edit' %}保存更改{% else %}添加题目{% endif %}</button>
-</form>
-</body>
-</html>
+
+        <label for="tags">标签（用逗号分隔；层级使用“/”）</label>
+        <input type="text" id="tags" name="tags" value="{{ question_data.tags if question_data else '' }}" placeholder="例如：数学/代数, 日本语/语法">
+        <div class="helper-text">示例：<code>数学/代数</code>、<code>综合科目/地理/气候</code>。使用逗号分隔多个标签，前缀可用于分类检索。</div>
+
+        <div class="form-actions">
+            <a class="btn btn-secondary" href="{{ request.url_for('admin') }}">返回后台</a>
+            <button class="btn btn-primary" type="submit">{% if action == 'edit' %}保存更改{% else %}添加题目{% endif %}</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
