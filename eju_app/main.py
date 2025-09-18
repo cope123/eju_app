@@ -199,6 +199,14 @@ async def admin(
     with get_db() as conn:
         cur = conn.execute("SELECT * FROM questions ORDER BY id")
         questions = cur.fetchall()
+    total_count = len(questions)
+    section_counts = {}
+    available_sections = set()
+    for row in questions:
+        section = row["section"] or "未分类"
+        section_counts[section] = section_counts.get(section, 0) + 1
+        if row["section"]:
+            available_sections.add(row["section"])
     return templates.TemplateResponse(
         "admin.html",
         {
@@ -206,6 +214,9 @@ async def admin(
             "questions": questions,
             "msg": msg,
             "category": category,
+            "total_count": total_count,
+            "section_counts": section_counts,
+            "available_sections": sorted(available_sections),
         },
     )
 

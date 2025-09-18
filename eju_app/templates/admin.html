@@ -4,68 +4,487 @@
 <meta charset="UTF-8">
 <title>后台管理 - EJU 题库</title>
 <style>
-body { font-family: sans-serif; margin: 2rem; background-color: #f9fafb; color: #333; }
-h1 { color: #007bff; }
-nav a { margin-right: 1rem; text-decoration: none; color: #007bff; }
-nav a.button {
-  display: inline-block;
-  padding: 0.5rem 1rem;
-  background-color: #28a745;
-  color: #fff;
-  border-radius: 4px;
+:root {
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --success: #16a34a;
+  --danger: #dc2626;
+  --gray-100: #f8fafc;
+  --gray-200: #e2e8f0;
+  --gray-400: #94a3b8;
+  --gray-600: #475569;
 }
-nav a.button:hover { background-color: #218838; }
-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-th, td { padding: 0.5rem; border: 1px solid #ddd; text-align: left; }
-th { background-color: #f1f1f1; }
-.actions a { margin-right: 0.5rem; text-decoration: none; color: #007bff; }
-.flash { padding: 0.5rem; margin-bottom: 1rem; border-radius: 4px; }
-.flash.error { background-color: #f8d7da; color: #842029; }
-.flash.success { background-color: #d1e7dd; color: #0f5132; }
+* {
+  box-sizing: border-box;
+}
+body {
+  font-family: "SF Pro Display", "PingFang SC", "Microsoft YaHei", sans-serif;
+  margin: 0;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #eef2ff 0%, #f8fafc 100%);
+  color: #0f172a;
+}
+.wrapper {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 3rem;
+}
+header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+header h1 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+header p {
+  margin: 0.25rem 0 0;
+  color: var(--gray-600);
+}
+nav {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+nav a {
+  text-decoration: none;
+  color: var(--primary);
+  padding: 0.5rem 0.75rem;
+  border-radius: 999px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+nav a:hover {
+  background-color: rgba(37, 99, 235, 0.12);
+  color: var(--primary-dark);
+}
+a.button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background-color: var(--primary);
+  color: #fff;
+  padding: 0.55rem 1.1rem;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+a.button:hover {
+  background-color: var(--primary-dark);
+  transform: translateY(-1px);
+}
+.flash {
+  margin-top: 1.5rem;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.95rem;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+}
+.flash.success {
+  background-color: #dcfce7;
+  color: #166534;
+}
+.flash.error {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+.flash button {
+  border: none;
+  background: transparent;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: inherit;
+}
+.stats {
+  margin-top: 2rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+.stat-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 1rem 1.2rem;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+.stat-label {
+  display: block;
+  color: var(--gray-600);
+  font-size: 0.9rem;
+}
+.stat-value {
+  margin-top: 0.35rem;
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+.toolbar {
+  margin-top: 2.5rem;
+  background: #fff;
+  padding: 1.1rem 1.25rem;
+  border-radius: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.06);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+}
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+label.filter-item {
+  font-size: 0.9rem;
+  color: var(--gray-600);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+select, input[type="search"] {
+  padding: 0.45rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid var(--gray-200);
+  background-color: var(--gray-100);
+  font-size: 0.95rem;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+select:focus, input[type="search"]:focus {
+  outline: none;
+  border-color: var(--primary);
+  background-color: #fff;
+}
+.table-wrapper {
+  margin-top: 1.5rem;
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 24px 42px rgba(15, 23, 42, 0.08);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+thead {
+  background: #f1f5f9;
+}
+th, td {
+  padding: 0.85rem 1rem;
+  text-align: left;
+  font-size: 0.95rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.24);
+}
+th {
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  color: var(--gray-600);
+}
+tr:last-child td {
+  border-bottom: none;
+}
+.question-cell {
+  max-width: 380px;
+}
+.question-cell h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+.question-meta {
+  margin-top: 0.35rem;
+  font-size: 0.85rem;
+  color: var(--gray-600);
+}
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  background-color: rgba(37, 99, 235, 0.12);
+  color: var(--primary-dark);
+  font-size: 0.78rem;
+  font-weight: 600;
+  margin: 0.2rem 0.4rem 0.2rem 0;
+}
+.tag-empty {
+  color: var(--gray-400);
+}
+.section-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  background: #ede9fe;
+  color: #6d28d9;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+.actions {
+  display: flex;
+  gap: 0.5rem;
+}
+.action-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+.action-link.edit {
+  background: rgba(37, 99, 235, 0.12);
+  color: var(--primary-dark);
+}
+.action-link.edit:hover {
+  transform: translateY(-1px);
+}
+.action-link.delete {
+  background: rgba(220, 38, 38, 0.12);
+  color: var(--danger);
+}
+.action-link.delete:hover {
+  transform: translateY(-1px);
+}
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--gray-600);
+}
+.empty-state strong {
+  display: block;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+.empty-state a.button {
+  margin-top: 1rem;
+}
+.no-results {
+  text-align: center;
+  color: var(--gray-400);
+}
+@media (max-width: 768px) {
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  th:nth-child(3), td:nth-child(3) {
+    display: none;
+  }
+}
 </style>
 </head>
 <body>
-<h1>后台管理</h1>
-<nav>
-    <a href="{{ url_for('home') }}">返回首页</a>
-    <a class="button" href="{{ url_for('add_question_get') }}">添加新题目</a>
-    <a class="button" href="{{ url_for('quiz') }}">前往学生答题</a>
-</nav>
+<div class="wrapper">
+  <header>
+    <div>
+      <h1>后台管理</h1>
+      <p>查看、筛选并快速维护题库内容。</p>
+    </div>
+    <nav>
+      <a href="{{ url_for('home') }}">返回首页</a>
+      <a href="{{ url_for('quiz') }}">前往学生答题</a>
+      <a class="button" href="{{ url_for('add_question_get') }}">➕ 添加新题目</a>
+    </nav>
+  </header>
 
-{% if msg %}
-<div class="flash {{ category }}">{{ msg }}</div>
-{% endif %}
+  {% if msg %}
+  <div class="flash {{ category or 'success' }}" role="alert">
+    <span>{{ msg }}</span>
+    <button type="button" aria-label="关闭" onclick="this.parentElement.style.display='none'">&times;</button>
+  </div>
+  {% endif %}
 
-<table>
-    <thead>
+  <section class="stats">
+    <div class="stat-card">
+      <span class="stat-label">题目总数</span>
+      <span class="stat-value">{{ total_count }}</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">日语板块</span>
+      <span class="stat-value">{{ section_counts.get('日语', 0) }}</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">综合科目板块</span>
+      <span class="stat-value">{{ section_counts.get('综合科目', 0) }}</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">理科板块</span>
+      <span class="stat-value">{{ section_counts.get('理科', 0) }}</span>
+    </div>
+    {% for extra_section in available_sections %}
+      {% if extra_section not in ['日语', '综合科目', '理科'] %}
+      <div class="stat-card">
+        <span class="stat-label">{{ extra_section }}板块</span>
+        <span class="stat-value">{{ section_counts.get(extra_section, 0) }}</span>
+      </div>
+      {% endif %}
+    {% endfor %}
+    {% if section_counts.get('未分类', 0) %}
+    <div class="stat-card">
+      <span class="stat-label">未分类</span>
+      <span class="stat-value">{{ section_counts.get('未分类', 0) }}</span>
+    </div>
+    {% endif %}
+  </section>
+
+  <section class="toolbar">
+    <div class="filters">
+      <label class="filter-item">
+        板块筛选
+        <select id="section-filter">
+          <option value="">全部板块</option>
+          {% for sec in available_sections %}
+          <option value="{{ sec }}">{{ sec }}</option>
+          {% endfor %}
+          {% if section_counts.get('未分类', 0) %}
+          <option value="未分类">未分类</option>
+          {% endif %}
+        </select>
+      </label>
+      <label class="filter-item">
+        关键词检索
+        <input type="search" id="search-input" placeholder="按题干、标签或编号搜索">
+      </label>
+    </div>
+    <a class="button" href="{{ url_for('add_question_get') }}">➕ 新增题目</a>
+  </section>
+
+  <div class="table-wrapper">
+    <table>
+      <thead>
         <tr>
-            <th>ID</th>
-            <th>题目</th>
-            <th>标签</th>
-            <th>板块</th>
-            <th>正确答案</th>
-            <th>操作</th>
+          <th style="width: 70px;">编号</th>
+          <th>题干</th>
+          <th style="width: 220px;">标签</th>
+          <th style="width: 120px;">板块</th>
+          <th style="width: 110px;">正确答案</th>
+          <th style="width: 150px;">操作</th>
         </tr>
-    </thead>
-    <tbody>
-        {% for q in questions %}
-        <tr>
-            <td>{{ q['id'] }}</td>
-            <td>{{ q['question']|truncate(60) }}</td>
-            <td>{{ q['tags'] }}</td>
-            <td>{{ q['section'] }}</td>
-            <td>{{ q['correct_option'] }}</td>
-            <td class="actions">
-                <a href="{{ url_for('edit_question_get', qid=q['id']) }}">编辑</a>
-                <a href="#" onclick="if(confirm('确认删除此题目？')){ document.getElementById('del-{{ q['id'] }}').submit(); } return false;">删除</a>
-                <form id="del-{{ q['id'] }}" method="post" action="{{ url_for('delete_question', qid=q['id']) }}" style="display:none;"></form>
-            </td>
-        </tr>
-        {% endfor %}
+      </thead>
+      <tbody>
         {% if questions|length == 0 %}
-        <tr><td colspan="6">没有题目。</td></tr>
+        <tr>
+          <td colspan="6" class="empty-state">
+            <strong>暂无题目</strong>
+            <span>点击下方按钮创建你的第一道题目。</span>
+            <div><a class="button" href="{{ url_for('add_question_get') }}">立即添加</a></div>
+          </td>
+        </tr>
+        {% else %}
+          {% for q in questions %}
+          <tr data-section="{{ q['section'] or '未分类' }}" data-text="{{ (q['id'] ~ ' ' ~ q['question'] ~ ' ' ~ (q['tags'] or '') ~ ' ' ~ (q['section'] or '未分类')) | lower }}">
+            <td>#{{ q['id'] }}</td>
+            <td class="question-cell">
+              <h3>{{ q['question'] }}</h3>
+              <div class="question-meta">A. {{ q['option_a'] }} ｜ B. {{ q['option_b'] }} ｜ C. {{ q['option_c'] }} ｜ D. {{ q['option_d'] }}</div>
+            </td>
+            <td>
+              {% if q['tags'] %}
+                {% for tag in q['tags'].split(',') %}
+                  {% set clean_tag = tag.strip() %}
+                  {% if clean_tag %}
+                  <span class="tag">{{ clean_tag }}</span>
+                  {% endif %}
+                {% endfor %}
+              {% else %}
+                <span class="tag-empty">未设置</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if q['section'] %}
+              <span class="section-badge">{{ q['section'] }}</span>
+              {% else %}
+              <span class="tag-empty">未分类</span>
+              {% endif %}
+            </td>
+            <td>{{ q['correct_option'] }}</td>
+            <td>
+              <div class="actions">
+                <a class="action-link edit" href="{{ url_for('edit_question_get', qid=q['id']) }}">编辑</a>
+                <a class="action-link delete" href="#" data-delete="{{ q['id'] }}">删除</a>
+                <form id="del-{{ q['id'] }}" method="post" action="{{ url_for('delete_question', qid=q['id']) }}" style="display:none"></form>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+          <tr class="no-results" style="display:none;">
+            <td colspan="6">未找到匹配的题目，请调整筛选条件。</td>
+          </tr>
         {% endif %}
-    </tbody>
-</table>
+      </tbody>
+    </table>
+  </div>
+</div>
+<script>
+const sectionFilter = document.getElementById('section-filter');
+const searchInput = document.getElementById('search-input');
+const rows = Array.from(document.querySelectorAll('tbody tr[data-section]'));
+const noResultsRow = document.querySelector('tr.no-results');
+
+function applyFilters() {
+  const sectionValue = sectionFilter ? sectionFilter.value.trim() : '';
+  const keyword = searchInput ? searchInput.value.trim().toLowerCase() : '';
+  let visibleCount = 0;
+  rows.forEach((row) => {
+    const rowSection = (row.dataset.section || '').trim();
+    const rowText = (row.dataset.text || '').toLowerCase();
+    const matchesSection = !sectionValue || rowSection === sectionValue;
+    const matchesKeyword = !keyword || rowText.includes(keyword);
+    if (matchesSection && matchesKeyword) {
+      row.style.display = '';
+      visibleCount += 1;
+    } else {
+      row.style.display = 'none';
+    }
+  });
+  if (noResultsRow) {
+    noResultsRow.style.display = visibleCount === 0 && rows.length > 0 ? '' : 'none';
+  }
+}
+if (sectionFilter) {
+  sectionFilter.addEventListener('change', applyFilters);
+}
+if (searchInput) {
+  searchInput.addEventListener('input', () => {
+    window.requestAnimationFrame(applyFilters);
+  });
+}
+applyFilters();
+
+document.querySelectorAll('[data-delete]').forEach((link) => {
+  link.addEventListener('click', (event) => {
+    event.preventDefault();
+    const qid = link.getAttribute('data-delete');
+    if (confirm('确认删除此题目？删除后不可恢复。')) {
+      const form = document.getElementById(`del-${qid}`);
+      if (form) {
+        form.submit();
+      }
+    }
+  });
+});
+</script>
 </body>
 </html>
+
